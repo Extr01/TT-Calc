@@ -51,12 +51,12 @@
           <span class="text-xs uppercase tracking-wider font-semibold text-emerald-400">Formula 1</span>
           <h2 class="text-lg font-bold text-white">EAtk</h2>
         </div>
-        <span class="text-xs font-mono bg-neutral-800 px-2.5 py-1 rounded text-neutral-300">x / (y%)</span>
+        <span class="text-xs font-mono bg-neutral-800 px-2.5 py-1 rounded text-neutral-300">EAtk * (y%)</span>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-semibold text-white mb-1.5">Value (x)</label>
+          <label class="block text-sm font-semibold text-white mb-1.5">EAtk</label>
           <input 
             type="number" 
             step="any"
@@ -67,7 +67,7 @@
           >
         </div>
         <div>
-          <label class="block text-sm font-semibold text-white mb-1.5">Percent (y %)</label>
+          <label class="block text-sm font-semibold text-white mb-1.5">Def %</label>
           <input 
             type="number" 
             step="any"
@@ -210,7 +210,7 @@
     }
 
     function calculateAll() {
-      // 1. EAtk = x / (y / 100)
+      // 1. EAtk = x * ((100 - y) / 100)
       const eatk_x = parseFloat(document.getElementById("eatk_x").value);
       const eatk_y = parseFloat(document.getElementById("eatk_y").value);
       const eatkOut = document.getElementById("eatk_result");
@@ -220,7 +220,7 @@
           eatkOut.textContent = "Cannot div by 0";
           eatkOut.className = "text-lg font-bold font-mono text-rose-400";
         } else {
-          const val = eatk_x / (eatk_y / 100);
+          const val = eatk_x * ((100 - eatk_y) / 100);
           eatkOut.textContent = formatNumber(val);
           eatkOut.className = "text-2xl font-bold font-mono text-emerald-400";
         }
