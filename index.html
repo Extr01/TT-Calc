@@ -2,245 +2,369 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Stat Calculator</title>
 
-  <!-- iOS PWA Full-Screen Settings -->
+  <!-- iOS PWA Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Stat Calc">
+  <link id="apple-touch-icon" rel="apple-touch-icon">
 
-  <!-- Embedded Home Screen Icon -->
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23121212'/><text x='50' y='64' font-size='38' text-anchor='middle' fill='%23ffffff' font-family='-apple-system, sans-serif' font-weight='800'>CALC</text></svg>">
-
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
+    /* Safe-area insets for iPad notch/home bar */
     body {
+      padding-top: env(safe-area-inset-top, 20px);
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+      padding-left: env(safe-area-inset-left, 16px);
+      padding-right: env(safe-area-inset-right, 16px);
       background-color: #121212;
-      color: #ffffff;
-      min-height: 100vh;
-      padding: calc(env(safe-area-inset-top, 20px) + 20px) 20px 40px 20px;
-      display: flex;
-      justify-content: center;
-    }
-    .wrapper {
-      width: 100%;
-      max-width: 440px;
-    }
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 24px;
-      letter-spacing: -0.5px;
-    }
-    .field {
-      margin-bottom: 18px;
-    }
-    label {
-      display: block;
-      color: #ffffff;
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    input {
-      width: 100%;
-      background-color: #ffffff;
-      color: #121212;
-      border: 2px solid #ffffff;
-      border-radius: 10px;
-      padding: 14px 16px;
-      font-size: 1.15rem;
-      font-weight: 700;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    input:focus {
-      border-color: #3b82f6;
-    }
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 8px;
-      margin-bottom: 24px;
-    }
-    button {
-      flex: 1;
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 700;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-    }
-    .btn-save {
-      background-color: #ffffff;
-      color: #121212;
-    }
-    .btn-save:active {
-      background-color: #e5e5e5;
-    }
-    .btn-clear {
-      background-color: #262626;
-      color: #ef4444;
-      border: 1px solid #404040;
-    }
-    .feedback {
-      text-align: center;
-      font-size: 0.85rem;
-      min-height: 1.2rem;
-      margin-top: -16px;
-      margin-bottom: 18px;
-      color: #10b981;
-      font-weight: 600;
-    }
-    .card {
-      background-color: #1e1e1e;
-      border: 1px solid #2e2e2e;
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #2a2a2a;
-      padding-bottom: 12px;
-    }
-    .row:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-    .row-title {
-      font-size: 0.95rem;
-      color: #a3a3a3;
-      font-weight: 600;
-    }
-    .row-value {
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .highlight {
-      color: #60a5fa;
-      font-size: 1.5rem;
     }
   </style>
 </head>
-<body>
-  <div class="wrapper">
-    <h1>Stat Calculator</h1>
+<body class="text-white min-h-screen flex flex-col items-center">
 
-    <div class="field">
-      <label for="valX">X Value</label>
-      <input type="number" id="valX" placeholder="Enter X" inputmode="decimal">
-    </div>
+  <div class="w-full max-w-2xl px-4 py-6 flex flex-col gap-6">
 
-    <div class="field">
-      <label for="valY">Y Value (%)</label>
-      <input type="number" id="valY" placeholder="Enter Y" inputmode="decimal">
-    </div>
-
-    <div class="btn-group">
-      <button class="btn-save" id="btnSave">Save Inputs</button>
-      <button class="btn-clear" id="btnClear">Clear Saved</button>
-    </div>
-    <div class="feedback" id="feedback"></div>
-
-    <div class="card">
-      <div class="row">
-        <span class="row-title">EAtk [ x / (y%) ]</span>
-        <span class="row-value" id="resEAtk">—</span>
+    <!-- Header & Action Bar -->
+    <header class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-neutral-800 pb-4">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Stat Calculator</h1>
+        <p id="save-status" class="text-xs text-neutral-400 mt-1">Status: Initialized</p>
       </div>
-      <div class="row">
-        <span class="row-title">Def [ x / ((100 - y)%) ]</span>
-        <span class="row-value" id="resDef">—</span>
+
+      <div class="flex items-center gap-3">
+        <button id="revert-btn" onclick="revertToSaved()" class="px-3 py-2 text-xs font-semibold rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition">
+          Revert
+        </button>
+        <button id="save-btn" onclick="saveInputs()" class="px-5 py-2 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 active:scale-95 transition shadow-lg shadow-emerald-950">
+          Save Inputs
+        </button>
       </div>
-      <div class="row">
-        <span class="row-title">TDef [ floor(x / Def) ]</span>
-        <span class="row-value highlight" id="resTDef">—</span>
+    </header>
+
+    <!-- CARD 1: EAtk -->
+    <section class="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-md">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <span class="text-xs uppercase tracking-wider font-semibold text-emerald-400">Formula 1</span>
+          <h2 class="text-lg font-bold text-white">EAtk</h2>
+        </div>
+        <span class="text-xs font-mono bg-neutral-800 px-2.5 py-1 rounded text-neutral-300">x / (y%)</span>
       </div>
-    </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-white mb-1.5">Value (x)</label>
+          <input 
+            type="number" 
+            step="any"
+            id="eatk_x" 
+            oninput="handleInputChange()"
+            placeholder="e.g. 1000"
+            class="w-full bg-white text-black font-semibold px-3 py-2.5 rounded-lg border-2 border-neutral-300 focus:outline-none focus:border-emerald-500"
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-white mb-1.5">Percent (y %)</label>
+          <input 
+            type="number" 
+            step="any"
+            id="eatk_y" 
+            oninput="handleInputChange()"
+            placeholder="e.g. 25"
+            class="w-full bg-white text-black font-semibold px-3 py-2.5 rounded-lg border-2 border-neutral-300 focus:outline-none focus:border-emerald-500"
+          >
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-neutral-800 flex items-baseline justify-between">
+        <span class="text-sm font-medium text-neutral-400">Calculated EAtk:</span>
+        <span id="eatk_result" class="text-2xl font-bold font-mono text-emerald-400">—</span>
+      </div>
+    </section>
+
+    <!-- CARD 2: Def -->
+    <section class="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-md">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <span class="text-xs uppercase tracking-wider font-semibold text-blue-400">Formula 2</span>
+          <h2 class="text-lg font-bold text-white">Def</h2>
+        </div>
+        <span class="text-xs font-mono bg-neutral-800 px-2.5 py-1 rounded text-neutral-300">x / ((100 - y)%)</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-white mb-1.5">Value (x)</label>
+          <input 
+            type="number" 
+            step="any"
+            id="def_x" 
+            oninput="handleInputChange()"
+            placeholder="e.g. 500"
+            class="w-full bg-white text-black font-semibold px-3 py-2.5 rounded-lg border-2 border-neutral-300 focus:outline-none focus:border-blue-500"
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-white mb-1.5">Percent (y %)</label>
+          <input 
+            type="number" 
+            step="any"
+            id="def_y" 
+            oninput="handleInputChange()"
+            placeholder="e.g. 30"
+            class="w-full bg-white text-black font-semibold px-3 py-2.5 rounded-lg border-2 border-neutral-300 focus:outline-none focus:border-blue-500"
+          >
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-neutral-800 flex items-baseline justify-between">
+        <span class="text-sm font-medium text-neutral-400">Calculated Def:</span>
+        <span id="def_result" class="text-2xl font-bold font-mono text-blue-400">—</span>
+      </div>
+    </section>
+
+    <!-- CARD 3: TDef -->
+    <section class="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-md">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <span class="text-xs uppercase tracking-wider font-semibold text-purple-400">Formula 3</span>
+          <h2 class="text-lg font-bold text-white">TDef</h2>
+        </div>
+        <span class="text-xs font-mono bg-neutral-800 px-2.5 py-1 rounded text-neutral-300">floor(x / Def)</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-white mb-1.5">Value (x)</label>
+          <input 
+            type="number" 
+            step="any"
+            id="tdef_x" 
+            oninput="handleInputChange()"
+            placeholder="e.g. 1500"
+            class="w-full bg-white text-black font-semibold px-3 py-2.5 rounded-lg border-2 border-neutral-300 focus:outline-none focus:border-purple-500"
+          >
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-sm font-semibold text-white">Def (y / Divisor)</label>
+            <button type="button" onclick="copyDefToTDef()" class="text-xs text-purple-400 hover:text-purple-300 underline">
+              Use Def from above
+            </button>
+          </div>
+          <input 
+            type="number" 
+            step="any"
+            id="tdef_def" 
+            oninput="handleInputChange()"
+            placeholder="e.g. 714.28"
+            class="w-full bg-white text-black font-semibold px-3 py-2.5 rounded-lg border-2 border-neutral-300 focus:outline-none focus:border-purple-500"
+          >
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-neutral-800 flex items-baseline justify-between">
+        <div>
+          <span class="text-sm font-medium text-neutral-400">Calculated TDef (Rounded Down):</span>
+          <div id="tdef_raw" class="text-xs font-mono text-neutral-500 mt-0.5">Raw: —</div>
+        </div>
+        <span id="tdef_result" class="text-3xl font-black font-mono text-purple-400">—</span>
+      </div>
+    </section>
+
   </div>
 
   <script>
-    const valX = document.getElementById('valX');
-    const valY = document.getElementById('valY');
-    const btnSave = document.getElementById('btnSave');
-    const btnClear = document.getElementById('btnClear');
-    const feedback = document.getElementById('feedback');
-    const resEAtk = document.getElementById('resEAtk');
-    const resDef = document.getElementById('resDef');
-    const resTDef = document.getElementById('resTDef');
+    const STORAGE_KEY = "pwa_stat_calculator_v2";
 
-    // Load saved values on startup ONLY if they exist
-    const storedX = localStorage.getItem('pwa_calc_x');
-    const storedY = localStorage.getItem('pwa_calc_y');
-    if (storedX !== null) valX.value = storedX;
-    if (storedY !== null) valY.value = storedY;
+    // Fields list
+    const fieldIds = ["eatk_x", "eatk_y", "def_x", "def_y", "tdef_x", "tdef_def"];
 
-    function runMath() {
-      const x = parseFloat(valX.value);
-      const y = parseFloat(valY.value);
+    let lastCalculatedDef = null;
 
-      if (isNaN(x) || isNaN(y)) {
-        resEAtk.textContent = '—';
-        resDef.textContent = '—';
-        resTDef.textContent = '—';
-        return;
-      }
+    // Load inputs on startup
+    window.addEventListener("DOMContentLoaded", () => {
+      createAppIcon();
+      loadSavedInputs();
+      calculateAll();
+    });
 
-      // 1. EAtk = x / (y%) = x / (y / 100)
-      const eatk = (y !== 0) ? (x / (y / 100)) : 0;
-
-      // 2. Def = x / ((100 - y)%) = x / ((100 - y) / 100)
-      const def = (100 - y !== 0) ? (x / ((100 - y) / 100)) : 0;
-
-      // 3. TDef = floor(x / Def)
-      const tdef = (def !== 0) ? Math.floor(x / def) : 0;
-
-      resEAtk.textContent = Number.isFinite(eatk) ? eatk.toLocaleString(undefined, { maximumFractionDigits: 3 }) : 'Undefined';
-      resDef.textContent = Number.isFinite(def) ? def.toLocaleString(undefined, { maximumFractionDigits: 3 }) : 'Undefined';
-      resTDef.textContent = Number.isFinite(tdef) ? tdef.toLocaleString() : 'Undefined';
+    function getInputs() {
+      const data = {};
+      fieldIds.forEach(id => {
+        data[id] = document.getElementById(id).value;
+      });
+      return data;
     }
 
-    // Auto-calculate on typing (does NOT save)
-    valX.addEventListener('input', runMath);
-    valY.addEventListener('input', runMath);
+    function setInputs(data) {
+      if (!data) return;
+      fieldIds.forEach(id => {
+        if (data[id] !== undefined) {
+          document.getElementById(id).value = data[id];
+        }
+      });
+    }
 
-    // Save inputs only when pressed
-    btnSave.addEventListener('click', () => {
-      localStorage.setItem('pwa_calc_x', valX.value);
-      localStorage.setItem('pwa_calc_y', valY.value);
-      feedback.textContent = 'Inputs saved to memory';
-      feedback.style.color = '#10b981';
-      setTimeout(() => { feedback.textContent = ''; }, 2500);
-    });
+    function calculateAll() {
+      // 1. EAtk = x / (y / 100)
+      const eatk_x = parseFloat(document.getElementById("eatk_x").value);
+      const eatk_y = parseFloat(document.getElementById("eatk_y").value);
+      const eatkOut = document.getElementById("eatk_result");
 
-    // Clear saved inputs
-    btnClear.addEventListener('click', () => {
-      localStorage.removeItem('pwa_calc_x');
-      localStorage.removeItem('pwa_calc_y');
-      valX.value = '';
-      valY.value = '';
-      runMath();
-      feedback.textContent = 'Saved data cleared';
-      feedback.style.color = '#ef4444';
-      setTimeout(() => { feedback.textContent = ''; }, 2500);
-    });
+      if (!isNaN(eatk_x) && !isNaN(eatk_y)) {
+        if (eatk_y === 0) {
+          eatkOut.textContent = "Cannot div by 0";
+          eatkOut.className = "text-lg font-bold font-mono text-rose-400";
+        } else {
+          const val = eatk_x / (eatk_y / 100);
+          eatkOut.textContent = formatNumber(val);
+          eatkOut.className = "text-2xl font-bold font-mono text-emerald-400";
+        }
+      } else {
+        eatkOut.textContent = "—";
+        eatkOut.className = "text-2xl font-bold font-mono text-neutral-600";
+      }
 
-    // Calculate immediately on load
-    runMath();
+      // 2. Def = x / ((100 - y) / 100)
+      const def_x = parseFloat(document.getElementById("def_x").value);
+      const def_y = parseFloat(document.getElementById("def_y").value);
+      const defOut = document.getElementById("def_result");
+
+      if (!isNaN(def_x) && !isNaN(def_y)) {
+        const denom = (100 - def_y) / 100;
+        if (denom === 0) {
+          defOut.textContent = "Cannot div by 0";
+          defOut.className = "text-lg font-bold font-mono text-rose-400";
+          lastCalculatedDef = null;
+        } else {
+          const val = def_x / denom;
+          lastCalculatedDef = val;
+          defOut.textContent = formatNumber(val);
+          defOut.className = "text-2xl font-bold font-mono text-blue-400";
+        }
+      } else {
+        defOut.textContent = "—";
+        defOut.className = "text-2xl font-bold font-mono text-neutral-600";
+        lastCalculatedDef = null;
+      }
+
+      // 3. TDef = floor(x / def)
+      const tdef_x = parseFloat(document.getElementById("tdef_x").value);
+      const tdef_def = parseFloat(document.getElementById("tdef_def").value);
+      const tdefOut = document.getElementById("tdef_result");
+      const tdefRaw = document.getElementById("tdef_raw");
+
+      if (!isNaN(tdef_x) && !isNaN(tdef_def)) {
+        if (tdef_def === 0) {
+          tdefOut.textContent = "Cannot div by 0";
+          tdefOut.className = "text-lg font-bold font-mono text-rose-400";
+          tdefRaw.textContent = "Raw: —";
+        } else {
+          const raw = tdef_x / tdef_def;
+          const rounded = Math.floor(raw);
+          tdefOut.textContent = rounded.toLocaleString();
+          tdefOut.className = "text-3xl font-black font-mono text-purple-400";
+          tdefRaw.textContent = `Raw: ${formatNumber(raw)}`;
+        }
+      } else {
+        tdefOut.textContent = "—";
+        tdefOut.className = "text-3xl font-black font-mono text-neutral-600";
+        tdefRaw.textContent = "Raw: —";
+      }
+    }
+
+    function handleInputChange() {
+      calculateAll();
+      updateSaveStatus();
+    }
+
+    // Copy the computed Def value into the TDef input field
+    function copyDefToTDef() {
+      if (lastCalculatedDef !== null && !isNaN(lastCalculatedDef)) {
+        document.getElementById("tdef_def").value = parseFloat(lastCalculatedDef.toFixed(4));
+        handleInputChange();
+      }
+    }
+
+    // Save strictly on button press
+    function saveInputs() {
+      const current = getInputs();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+      updateSaveStatus();
+
+      const btn = document.getElementById("save-btn");
+      const originalText = btn.textContent;
+      btn.textContent = "Saved ✓";
+      btn.classList.replace("bg-emerald-600", "bg-emerald-500");
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.classList.replace("bg-emerald-500", "bg-emerald-600");
+      }, 1200);
+    }
+
+    function loadSavedInputs() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const data = JSON.parse(raw);
+          setInputs(data);
+        } catch (e) {
+          console.error("Failed to parse saved state", e);
+        }
+      }
+      updateSaveStatus();
+    }
+
+    function revertToSaved() {
+      loadSavedInputs();
+      calculateAll();
+    }
+
+    function updateSaveStatus() {
+      const current = JSON.stringify(getInputs());
+      const saved = localStorage.getItem(STORAGE_KEY) || JSON.stringify({});
+      const statusEl = document.getElementById("save-status");
+
+      if (current === saved) {
+        statusEl.textContent = "All changes saved";
+        statusEl.className = "text-xs text-emerald-400 mt-1";
+      } else {
+        statusEl.textContent = "Unsaved changes (tap 'Save Inputs' to persist)";
+        statusEl.className = "text-xs text-amber-400 mt-1";
+      }
+    }
+
+    function formatNumber(num) {
+      if (!isFinite(num)) return "—";
+      return num.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 4
+      });
+    }
+
+    // Dynamic app icon for iPad Home Screen
+    function createAppIcon() {
+      const canvas = document.createElement("canvas");
+      canvas.width = 180;
+      canvas.height = 180;
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#121212";
+      ctx.fillRect(0, 0, 180, 180);
+
+      ctx.fillStyle = "#10b981";
+      ctx.font = "bold 76px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("∑", 90, 88);
+
+      const link = document.getElementById("apple-touch-icon");
+      if (link) link.href = canvas.toDataURL("image/png");
+    }
   </script>
 </body>
 </html>
