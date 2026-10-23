@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Stat Calculator</title>
+
+  <!-- iOS PWA Full-Screen Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Stat Calc">
+
+  <!-- Embedded Home Screen Icon -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23121212'/><text x='50' y='64' font-size='38' text-anchor='middle' fill='%23ffffff' font-family='-apple-system, sans-serif' font-weight='800'>CALC</text></svg>">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      min-height: 100vh;
+      padding: calc(env(safe-area-inset-top, 20px) + 20px) 20px 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .wrapper {
+      width: 100%;
+      max-width: 440px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 24px;
+      letter-spacing: -0.5px;
+    }
+    .field {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    input {
+      width: 100%;
+      background-color: #ffffff;
+      color: #121212;
+      border: 2px solid #ffffff;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      border-color: #3b82f6;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      margin-bottom: 24px;
+    }
+    button {
+      flex: 1;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-save {
+      background-color: #ffffff;
+      color: #121212;
+    }
+    .btn-save:active {
+      background-color: #e5e5e5;
+    }
+    .btn-clear {
+      background-color: #262626;
+      color: #ef4444;
+      border: 1px solid #404040;
+    }
+    .feedback {
+      text-align: center;
+      font-size: 0.85rem;
+      min-height: 1.2rem;
+      margin-top: -16px;
+      margin-bottom: 18px;
+      color: #10b981;
+      font-weight: 600;
+    }
+    .card {
+      background-color: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #2a2a2a;
+      padding-bottom: 12px;
+    }
+    .row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .row-title {
+      font-size: 0.95rem;
+      color: #a3a3a3;
+      font-weight: 600;
+    }
+    .row-value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .highlight {
+      color: #60a5fa;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>Stat Calculator</h1>
+
+    <div class="field">
+      <label for="valX">X Value</label>
+      <input type="number" id="valX" placeholder="Enter X" inputmode="decimal">
+    </div>
+
+    <div class="field">
+      <label for="valY">Y Value (%)</label>
+      <input type="number" id="valY" placeholder="Enter Y" inputmode="decimal">
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-save" id="btnSave">Save Inputs</button>
+      <button class="btn-clear" id="btnClear">Clear Saved</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+
+    <div class="card">
+      <div class="row">
+        <span class="row-title">EAtk [ x / (y%) ]</span>
+        <span class="row-value" id="resEAtk">—</span>
+      </div>
+      <div class="row">
+        <span class="row-title">Def [ x / ((100 - y)%) ]</span>
+        <span class="row-value" id="resDef">—</span>
+      </div>
+      <div class="row">
+        <span class="row-title">TDef [ floor(x / Def) ]</span>
+        <span class="row-value highlight" id="resTDef">—</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const valX = document.getElementById('valX');
+    const valY = document.getElementById('valY');
+    const btnSave = document.getElementById('btnSave');
+    const btnClear = document.getElementById('btnClear');
+    const feedback = document.getElementById('feedback');
+    const resEAtk = document.getElementById('resEAtk');
+    const resDef = document.getElementById('resDef');
+    const resTDef = document.getElementById('resTDef');
+
+    // Load saved values on startup ONLY if they exist
+    const storedX = localStorage.getItem('pwa_calc_x');
+    const storedY = localStorage.getItem('pwa_calc_y');
+    if (storedX !== null) valX.value = storedX;
+    if (storedY !== null) valY.value = storedY;
+
+    function runMath() {
+      const x = parseFloat(valX.value);
+      const y = parseFloat(valY.value);
+
+      if (isNaN(x) || isNaN(y)) {
+        resEAtk.textContent = '—';
+        resDef.textContent = '—';
+        resTDef.textContent = '—';
+        return;
+      }
+
+      // 1. EAtk = x / (y%) = x / (y / 100)
+      const eatk = (y !== 0) ? (x / (y / 100)) : 0;
+
+      // 2. Def = x / ((100 - y)%) = x / ((100 - y) / 100)
+      const def = (100 - y !== 0) ? (x / ((100 - y) / 100)) : 0;
+
+      // 3. TDef = floor(x / Def)
+      const tdef = (def !== 0) ? Math.floor(x / def) : 0;
+
+      resEAtk.textContent = Number.isFinite(eatk) ? eatk.toLocaleString(undefined, { maximumFractionDigits: 3 }) : 'Undefined';
+      resDef.textContent = Number.isFinite(def) ? def.toLocaleString(undefined, { maximumFractionDigits: 3 }) : 'Undefined';
+      resTDef.textContent = Number.isFinite(tdef) ? tdef.toLocaleString() : 'Undefined';
+    }
+
+    // Auto-calculate on typing (does NOT save)
+    valX.addEventListener('input', runMath);
+    valY.addEventListener('input', runMath);
+
+    // Save inputs only when pressed
+    btnSave.addEventListener('click', () => {
+      localStorage.setItem('pwa_calc_x', valX.value);
+      localStorage.setItem('pwa_calc_y', valY.value);
+      feedback.textContent = 'Inputs saved to memory';
+      feedback.style.color = '#10b981';
+      setTimeout(() => { feedback.textContent = ''; }, 2500);
+    });
+
+    // Clear saved inputs
+    btnClear.addEventListener('click', () => {
+      localStorage.removeItem('pwa_calc_x');
+      localStorage.removeItem('pwa_calc_y');
+      valX.value = '';
+      valY.value = '';
+      runMath();
+      feedback.textContent = 'Saved data cleared';
+      feedback.style.color = '#ef4444';
+      setTimeout(() => { feedback.textContent = ''; }, 2500);
+    });
+
+    // Calculate immediately on load
+    runMath();
+  </script>
+</body>
+</html>
